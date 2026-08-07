@@ -1,17 +1,20 @@
 import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
+import { DashboardPage } from '../pages/DashboardPage'; // Import it here
 
-// Define the types of your pages
+// Update your custom fixture types mapping
 type MyFixtures = {
   loginPage: LoginPage;
+  dashboardPage: DashboardPage; // Add layout property mapping
 };
 
-// Extend the core test runner to include your page objects
 export const test = base.extend<MyFixtures>({
   loginPage: async ({ page }, use) => {
-    // This runs automatically before every test that calls 'loginPage'
-    const loginPage = new LoginPage(page);
-    await use(loginPage);
+    await use(new LoginPage(page));
+  },
+  dashboardPage: async ({ page }, use) => {
+    // Registers the Dashboard mapping framework-wide
+    await use(new DashboardPage(page));
   },
 });
 
