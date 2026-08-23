@@ -1,58 +1,75 @@
 import { Page, Locator } from '@playwright/test';
+import { BasePage } from './BasePage';
+import { TestData } from '../src/utils/TestData';
 
-export class LoginPage {
-    // 1. Define types for the page and elements
-    readonly page: Page;
+export class LoginPage extends BasePage {
+    // 1. Locators for Section 21: Authentication Simulation
+    readonly authSection: Locator;
+    readonly authHeading: Locator;
+    readonly authForm: Locator;
     readonly usernameInput: Locator;
     readonly passwordInput: Locator;
     readonly loginButton: Locator;
-    readonly errorMessage: Locator;
+    readonly logoutButton: Locator;
+    readonly authResult: Locator;
 
-    // 2. Initialize elements inside the constructor
     constructor(page: Page) {
-        this.page = page;
+        super(page);
 
-        // Using robust selectors (modify these to match your actual corporate application)
-        this.usernameInput = page.locator('input[name="username"], input[type="email"]');
-        this.passwordInput = page.locator('input[name="password"], input[type="password"]');
-        this.loginButton = page.locator('button[type="submit"], #login-button');
-        this.errorMessage = page.locator('.error-message, [role="alert"]');
+        this.authSection = page.locator('#section-21');
+        this.authHeading = page.locator('#section-21 h2');
+        this.authForm = page.locator('#auth-form, [data-testid="auth-form"]');
+        this.usernameInput = page.locator('#auth-username, [data-testid="auth-username"]');
+        this.passwordInput = page.locator('#auth-password, [data-testid="auth-password"]');
+        this.loginButton = page.locator('#auth-login-btn, [data-testid="auth-login-btn"]');
+        this.logoutButton = page.locator('#auth-logout-btn, [data-testid="auth-logout-btn"], #section-21 button:has-text("Logout"), #section-21 button:has-text("Log out")');
+        this.authResult = page.locator('#auth-result, [data-testid="auth-result"], #section-21 p.text-accent, #section-21 p:has-text("Logged in"), #section-21 p:has-text("Invalid")');
     }
 
     /**
-     * Navigates to the login screen using the base URL configured in playwright.config.ts
+     * Navigates to the practice hub and scrolls to Section 21
      */
-    async navigateToApp(): Promise<void> {
-        // Navigates to the base URL root or an extension like '/login'
-        await this.page.goto('/login');
+    async navigate(): Promise<void> {
+        await this.goto('/practice');
+        await this.scrollIntoView(this.authSection);
     }
 
     /**
-     * Performs the full login sequence
-     * @param username The corporate login handle/email
-     * @param password The secret access credential
+     * Executes the login form submission
+     * @param username Account username
+     * @param password Account password
      */
     async login(username: string, password: string): Promise<void> {
-        // clear inputs and fill them safely
-        await this.usernameInput.fill(username);
-        await this.passwordInput.fill(password);
-
-        // Wait for navigation and click simultaneously to prevent race conditions
-        await Promise.all([
-            this.page.waitForNavigation({ waitUntil: 'networkidle', timeout: 10000 }).catch(() => {
-                // Catch timeout block gracefully if navigating to a single-page app dashboard
-            }),
-            this.loginButton.click()
-        ]);
+        await this.scrollIntoView(this.authSection);
+        await this.fillInput(this.usernameInput, username);
+        await this.fillInput(this.passwordInput, password);
+        await this.clickElement(this.loginButton);
     }
 
     /**
-     * Extracts text from any visible UI login validation errors
-     * @returns The error message text string
+     * Performs login using pre-configured default admin credentials
      */
-    async getErrorMessageText(): Promise<string> {
-        // Wait for the element to appear on screen before reading text
-        await this.errorMessage.waitFor({ state: 'visible', timeout: 5000 });
-        return await this.errorMessage.innerText();
+    async loginWithDefaultAdmin(): Promise<void> {
+        const { username, password } = TestData.auth.validUser;
+        await this.login(username, password);
+    }
+
+    /**
+     * Clicks the logout button if present after successful login
+     */
+    async logout(): Promise<void> {
+        if (await this.isElementVisible(this.logoutButton, 2000)) {
+            await this.clickElement(this.logoutButton);
+        }
+    }
+
+    /**
+     * Retrieves the authentication result / status feedback
+     */
+    async getAuthStatusText(): Promise<string> {
+        if (await this.isElementVisible(this.authResult, 3000)) {
+            return await this.getElementText(this.authResult);
+        }
+        return '';
     }
 }
