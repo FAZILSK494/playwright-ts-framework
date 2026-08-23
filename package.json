@@ -1,0 +1,26 @@
+{
+  "name": "playwright-ts-framework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.1.2",
+    "@types/pg": "^8.20.4",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}

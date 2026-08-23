@@ -1,0 +1,64 @@
+name: Playwright Enterprise Test Suite
+
+# 1. Trigger the workflow on pushes or pull requests to main/master branches
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  # Allows you to manually trigger the test suite from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment to run tests against'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest # Using fast, cost-effective Linux runners
+
+    steps:
+      # Step 1: Clone the code repository into the runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Initialize Node.js environment with caching for speed
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      # Step 3: Clean install project dependencies tracked in package.lock
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Install isolated Playwright browser binaries
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+    # Step 5: Execute test suite across parallel workers
+    # It dynamically detects whether it was a manual trigger or an automated branch push
+    name: Run Playwright Tests
+    env:
+      ENV: ${{ github.event.inputs.environment || 'staging' }}
+      # If your DB is protected behind a corporate network, mask variables via GitHub Secrets
+      DB_HOST: ${{ secrets.DB_HOST_STAGING }}
+      DB_USER: ${{ secrets.DB_USER_STAGING }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD_STAGING }}
+    run: npm run test:staging # Maps directly back to your package.json shortcut
+      
+      # Step 6: Publish execution assets if tests happen to fail
+      - name: Upload Test Report Artifacts
+        if: always() # Ensures reports upload even if the previous test step fails
+        uses: actions/artifacts/upload-artifact@v4
+        with:
+          name: playwright-execution-report
+          path: playwright-report/
+          retention-days: 30 # Retain files for a month for debugging triage

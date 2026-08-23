@@ -3,6 +3,8 @@ import { HomePage } from '../../Pages/HomePage';
 import { LoginPage } from '../../Pages/LoginPage';
 import { BasicFormPage } from '../../Pages/BasicFormPage';
 import { ButtonInteractionsPage } from '../../Pages/ButtonInteractionsPage';
+import { CheckboxesRadiosPage } from '../../Pages/CheckboxesRadiosPage';
+import { AlertsPage } from '../../Pages/AlertsPage';
 
 // Define custom fixture types
 type CustomFixtures = {
@@ -10,6 +12,8 @@ type CustomFixtures = {
     loginPage: LoginPage;
     basicFormPage: BasicFormPage;
     buttonInteractionsPage: ButtonInteractionsPage;
+    checkboxesRadiosPage: CheckboxesRadiosPage;
+    alertsPage: AlertsPage;
 };
 
 export const test = base.extend<CustomFixtures>({
@@ -28,6 +32,14 @@ export const test = base.extend<CustomFixtures>({
     buttonInteractionsPage: async ({ page }, use) => {
         const buttonInteractionsPage = new ButtonInteractionsPage(page);
         await use(buttonInteractionsPage);
+    },
+    checkboxesRadiosPage: async ({ page }, use) => {
+        const checkboxesRadiosPage = new CheckboxesRadiosPage(page);
+        await use(checkboxesRadiosPage);
+    },
+    alertsPage: async ({ page }, use) => {
+        const alertsPage = new AlertsPage(page);
+        await use(alertsPage);
     },
 });
 
