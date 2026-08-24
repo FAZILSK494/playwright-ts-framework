@@ -102,6 +102,11 @@ export const TestData = {
         promptSpecialInput: 'Test!@#$%^&*()_+{}:"<>? 🚀 🔥',
     },
 
+    modals: {
+        expectedTitle: 'Practice Modal',
+        expectedDescription: 'This is a modal dialog. Click the overlay, the X, or Close.',
+    },
+
     dropdowns: {
         standardColor: 'green',
         multiTools: ['python', 'javascript'],
