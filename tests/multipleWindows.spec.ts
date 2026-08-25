@@ -1,4 +1,5 @@
 import { test, expect } from '../src/fixtures/baseTest';
+import { Page } from '@playwright/test';
 
 test.describe('Section 20: Multiple Windows Test Suite', () => {
 
@@ -9,7 +10,7 @@ test.describe('Section 20: Multiple Windows Test Suite', () => {
     test.describe('Positive Scenarios', () => {
 
         test('TC-WIN-POS-01: Open new tab window and verify context switching', async ({ multipleWindowsPage }) => {
-            let newPageInstance;
+            let newPageInstance: Page;
 
             await test.step('Click Open New Tab and capture new page event', async () => {
                 newPageInstance = await multipleWindowsPage.openNewWindow();
